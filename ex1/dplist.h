@@ -32,7 +32,7 @@ dplist_t *dpl_create();
 void dpl_free(dplist_t **list);
 
 /** Returns the number of elements in the list.
- * - If 'list' is is NULL, -1 is returned.
+ * - If 'list' is NULL, -1 is returned.
  * \param list a pointer to the list
  * \return the size of the list
  */
