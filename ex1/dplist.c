@@ -31,26 +31,20 @@ dplist_t *dpl_create() {
   return list; //Returns a pointer to the newly created empty list
 }
 
-/** Deletes all elements in the list
- * - Every list node of the list must be deleted. (free memory)
- * - The list itself also needs to be deleted. (free all memory)
- * - '*list' must be set to NULL.
- * \param list a double pointer to the list
-*/
 void dpl_free(dplist_t **list) {
-    //dplist_node_t *dummy = NULL;
-    //dummy = (*list)->head;
-    //while (dummy->next != NULL) {
-    //    free((*dummy)->element);
-    //    dummy->prev = NULL;
-    //    dummy = dummy->next;
-    //    count++;
-    //}
-    //(*list)->sizeOfList = 0
-    //*list = NULL;
-    //TODO: add your code here
-    //Do extensive testing with valgrind. 
-
+    if (list == NULL) return;
+    if (*list == NULL) return;
+    dplist_node_t *dummy = (*list)->head;
+    dplist_node_t *nextNode = NULL;
+    while (dummy != NULL) { // not (dummy->next != NULL) bc this would exit before setting the last node free
+        nextNode = dummy->next;
+        //free(dummy->element); //necessary if element is a pointer
+        free(dummy);
+        dummy = nextNode;
+    }
+    free(*list);
+    *list = NULL;
+    //Do extensive testing with valgrind.
 }
 
 /* Important note: to implement any list manipulation operator (insert, append, delete, sort, ...), always be aware of the following cases:
@@ -108,8 +102,65 @@ dplist_t *dpl_insert_at_index(dplist_t *list, element_t element, int index) {
 
 dplist_t *dpl_remove_at_index(dplist_t *list, int index) {
 
-    //TODO: add your code here
-    return NULL;
+    if (list == NULL) return NULL;
+    if (list->sizeOfList ==0) return list;
+    dplist_node_t *dummy = list->head;
+    //Case 1
+    if (index <= 0) {
+        list->head = dummy->next; //second node becomes first node
+        if(list->head != NULL){
+        list->head->prev = NULL;//new first node should not have a pointer to the previous first node
+        }
+        //free(dummy->element); //necessary if element is a pointer
+        free(dummy);
+        list->sizeOfList--;
+        return list;
+    }
+    int counter = 0;
+    //Cases 2 and 3 together
+    while (dummy->next != NULL && counter < index) {
+        dummy = dummy->next;
+        counter++;
+    }
+
+    if (dummy->prev != NULL) {
+        dummy->prev->next = dummy->next;
+    }
+    if (dummy->next != NULL) {
+        dummy->next->prev = dummy->prev;
+    }
+    /*
+    //Case 2
+    int counter = 0;
+    while (dummy->next != NULL) {
+        if(counter == index) {
+            if (dummy->prev != NULL) {
+                dummy->prev->next = dummy->next;
+            }
+            if (dummy->next != NULL) {
+                dummy->next->prev = dummy->prev;
+            }
+            //free(dummy->element); //necessary if element is a pointer
+            free(dummy);
+            list->sizeOfList--;
+            return list;
+        }
+        dummy = dummy->next;
+        counter++;
+    }
+    //Case 3
+    if (dummy->prev != NULL) {
+        dummy->prev->next = dummy->next;
+    }
+    if (dummy->next != NULL) {
+        dummy->next->prev = dummy->prev;
+    }
+    */
+
+    //free(dummy->element); //necessary if element is a pointer
+    free(dummy);
+    list->sizeOfList--;
+    return list;
 }
 
 
@@ -139,16 +190,37 @@ dplist_node_t *dpl_get_reference_at_index(dplist_t *list, int index) {
     return dummy; // If we reached the end before reaching 'index', dummy points to the last node.
 }
 
-
 element_t dpl_get_element_at_index(dplist_t *list, int index) {
+    if (list == NULL) return (element_t) 0; //should be NULL for pointers
+    if (list->sizeOfList ==0) return (element_t) 0;
 
-    //TODO: add your code here
-    return '\e';
+    dplist_node_t *dummy = list->head;
+    if (index <= 0) {
+        return list->head->element;
+    }
+    int counter = 0;
+    while (dummy->next != NULL && counter < index) {
+        dummy = dummy->next;
+        counter++;
+    }
+    return dummy->element;
 }
 
 int dpl_get_index_of_element(dplist_t *list, element_t element) {
+    if (list == NULL) return -1; //should be NULL for pointers
+    if (list->sizeOfList ==0) return -1;
+    if (list->head == NULL) return -1;
 
-    //TODO: add your code here
+    dplist_node_t *dummy = list->head;
+    int index = 0;
+
+    while (dummy != NULL) {
+        if (dummy->element == element){
+            return index;
+        }
+        dummy = dummy->next;
+        index++;
+    }
     return -1;
 }
 
